@@ -11,7 +11,7 @@ type JsonDb struct {
 }
 
 func NewJsonDb() *JsonDb {
-	name := promptdata.PromptData("Введите название файла: ")
+	name := promptdata.PromptData("Введите название файла")
 	return &JsonDb{
 		NameDb: name,
 	}
