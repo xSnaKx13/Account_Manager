@@ -1,7 +1,6 @@
 package files
 
 import (
-	promptdata "account-manager/promptData"
 	"fmt"
 	"os"
 )
@@ -11,7 +10,7 @@ type JsonDb struct {
 }
 
 func NewJsonDb() *JsonDb {
-	name := promptdata.PromptData("Введите название файла")
+	name := "accounts.json"
 	return &JsonDb{
 		NameDb: name,
 	}

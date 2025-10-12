@@ -38,7 +38,7 @@ func (acc *Account) OutputAccount() {
 func CreateAccount() {
 	err := newAccount()
 	if err != nil {
-		fmt.Println(err, "\nАккаунт не создан")
+		promptdata.PrintError("Ошибк создания аккаунта!")
 		return
 	}
 	fmt.Print("Аккаунт создан!\n")
@@ -72,16 +72,16 @@ func newAccount() error {
 		newAcc.generatePassword(12)
 	}
 	db := files.NewJsonDb()
-	vault := NewVault(*db)
-	vault.AddAccount(*newAcc, db)
-
+	vault := NewVault(db)
+	vault.AddAccount(*newAcc)
+	vault.SaveAndUpdate(db)
 	return nil
 }
 func FindAccount() {
-	vault := NewVault(*files.NewJsonDb())
+	vault := NewVault(files.NewJsonDb())
 	vault.FindAccount()
 }
 func DeleteAccount() {
-	vault := NewVault(*files.NewJsonDb())
+	vault := NewVault(files.NewJsonDb())
 	vault.DeleteAccount()
 }

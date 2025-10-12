@@ -7,9 +7,12 @@ import (
 	"fmt"
 	"strings"
 	"time"
-
-	"github.com/fatih/color"
 )
+
+type Db interface {
+	Read() ([]byte, error)
+	Write([]byte)
+}
 
 type Vault struct {
 	Accaunts  []Account `json:"accounts"`
@@ -18,15 +21,18 @@ type Vault struct {
 
 type VaultWithDb struct {
 	Vault
-	db files.JsonDb
+	db Db
 }
 
-func (vault *VaultWithDb) AddAccount(acc Account, db *files.JsonDb) {
+func (vault *VaultWithDb) AddAccount(acc Account) {
 	vault.Accaunts = append(vault.Accaunts, acc)
 	vault.UpdatedAt = time.Now()
+}
+
+func (vault *VaultWithDb) SaveAndUpdate(db Db) {
 	data, err := vault.ToBytes()
 	if err != nil {
-		color.Red(err.Error())
+		promptdata.PrintError("Ошибка записи!")
 	}
 	db.Write(data)
 }
@@ -67,13 +73,13 @@ func (vault *VaultWithDb) DeleteAccount() {
 		fmt.Println("Аккаунт удален.")
 		data, err := vault.ToBytes()
 		if err != nil {
-			fmt.Println("Не удалось преобразовать!")
+			promptdata.PrintError("Не удалось преобразовать!")
 		}
 		db := files.NewJsonDb()
 		db.Write(data)
 		return
 	} else {
-		fmt.Println("Аккаунт не найден!")
+		promptdata.PrintError("Аккаунт не найден!")
 		return
 	}
 
@@ -82,17 +88,17 @@ func (vault *VaultWithDb) DeleteAccount() {
 func (vault *Vault) ToBytes() ([]byte, error) {
 	data, err := json.Marshal(vault)
 	if err != nil {
-		fmt.Println(err)
+		promptdata.PrintError("Ошибка преобразования в byte!")
 		return nil, err
 	}
 	return data, nil
 }
 
-func NewVault(db files.JsonDb) *VaultWithDb {
+func NewVault(db Db) *VaultWithDb {
 
 	data, err := db.Read()
 	if err != nil {
-		fmt.Println("Файл отсутствует, будет создан новый файл!")
+		promptdata.PrintError("Файл отсутствует, будет создан новый файл!")
 		return &VaultWithDb{
 			Vault: Vault{
 				Accaunts:  []Account{},
@@ -104,7 +110,7 @@ func NewVault(db files.JsonDb) *VaultWithDb {
 	var existingVault VaultWithDb
 	err = json.Unmarshal(data, &existingVault)
 	if err != nil {
-		color.Red(err.Error())
+		promptdata.PrintError("Ошибка распаковки json!")
 	}
 	return &existingVault
 }
