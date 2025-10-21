@@ -7,7 +7,13 @@ import (
 	"os"
 )
 
-func menu() {
+var menu = map[int]func(){
+	1: account.CreateAccount,
+	2: account.FindAccount,
+	3: account.DeleteAccount,
+}
+
+func Menu() {
 Menu:
 	for {
 		fmt.Println("Выберете действие: ")
@@ -22,17 +28,13 @@ Menu:
 		reader := bufio.NewReader(os.Stdin)
 		reader.ReadString('\n')
 
-		switch input {
-		case 1:
-			account.CreateAccount()
-		case 2:
-			account.FindAccount()
-		case 3:
-			account.DeleteAccount()
-		case 4:
+		menuFunc := menu[input]
+		if menuFunc != nil {
+			menuFunc()
+		} else if input == 4 {
 			break Menu
-		default:
-			fmt.Println("WRONG_INPUT")
+		} else {
+			fmt.Println("Некорректный ввод, попробуйте еще раз!")
 		}
 	}
 
