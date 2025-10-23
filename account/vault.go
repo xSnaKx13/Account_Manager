@@ -5,7 +5,6 @@ import (
 	promptdata "account-manager/promptData"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 )
 
@@ -37,17 +36,13 @@ func (vault *VaultWithDb) SaveAndUpdate(db Db) {
 	db.Write(data)
 }
 
-func (vault *VaultWithDb) FindAccount() {
-	name := promptdata.PromptData("Введите логин (или часть логина) для поиска")
+func (vault *VaultWithDb) FindAccount(prompt string, checker func(Account, string) bool) {
+	data := prompt
 	var isFound bool
 	for _, accounts := range vault.Accaunts {
-		isFound = strings.Contains(accounts.Login, name)
+		isFound = checker(accounts, data)
 		if isFound {
-			fmt.Println(accounts.Login)
-			fmt.Println(accounts.Password)
-			fmt.Println(accounts.URL)
-			fmt.Println(accounts.CreatedAt)
-			return
+			accounts.OutputAccount()
 		}
 	}
 	if !isFound {
@@ -56,13 +51,13 @@ func (vault *VaultWithDb) FindAccount() {
 	}
 }
 
-func (vault *VaultWithDb) DeleteAccount() {
+func (vault *VaultWithDb) DeleteAccount(checker func(Account, string) bool) {
 	var foundAccounts []Account
 
 	name := promptdata.PromptData("Введите логин (или часть логина) для удаления")
 	var isFound bool
 	for _, account := range vault.Accaunts {
-		isFound = strings.Contains(account.Login, name)
+		isFound = checker(account, name)
 		if !isFound {
 			foundAccounts = append(foundAccounts, account)
 		}
@@ -73,7 +68,7 @@ func (vault *VaultWithDb) DeleteAccount() {
 		fmt.Println("Аккаунт удален.")
 		data, err := vault.ToBytes()
 		if err != nil {
-			promptdata.PrintError("Не удалось преобразовать!")
+			promptdata.PrintError("Не удалось преобразовать в json!")
 		}
 		db := files.NewJsonDb()
 		db.Write(data)

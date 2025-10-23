@@ -9,8 +9,9 @@ import (
 
 var menu = map[int]func(){
 	1: account.CreateAccount,
-	2: account.FindAccount,
-	3: account.DeleteAccount,
+	2: account.FindAccountByLogin,
+	3: account.FindAccountByUrl,
+	4: account.DeleteAccountByLogin,
 }
 
 func Menu() {
@@ -18,9 +19,10 @@ Menu:
 	for {
 		fmt.Println("Выберете действие: ")
 		fmt.Println("1 - создать аккаунт")
-		fmt.Println("2 - найти аккаунт")
-		fmt.Println("3 - удалить аккаунт")
-		fmt.Println("4 - выход")
+		fmt.Println("2 - найти аккаунт по логину")
+		fmt.Println("3 - найти аккаунт по URL")
+		fmt.Println("4 - удалить аккаунт")
+		fmt.Println("5 - выйти из программы")
 
 		var input int
 		fmt.Scan(&input)
@@ -31,7 +33,7 @@ Menu:
 		menuFunc := menu[input]
 		if menuFunc != nil {
 			menuFunc()
-		} else if input == 4 {
+		} else if input == 5 {
 			break Menu
 		} else {
 			fmt.Println("Некорректный ввод, попробуйте еще раз!")

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -31,8 +32,9 @@ func (acc *Account) generatePassword(numberOfPasswordCharacters int) {
 
 func (acc *Account) OutputAccount() {
 	color.Cyan(acc.Login)
-	fmt.Println(acc.Password)
-	color.Magenta(acc.URL)
+	color.Cyan(acc.Password)
+	color.Cyan(acc.URL)
+	fmt.Println(acc.CreatedAt)
 }
 
 func CreateAccount() {
@@ -77,11 +79,26 @@ func newAccount() error {
 	vault.SaveAndUpdate(db)
 	return nil
 }
-func FindAccount() {
+
+func FindAccountByLogin() {
 	vault := NewVault(files.NewJsonDb())
-	vault.FindAccount()
+	login := promptdata.PromptData("Введите логин (или часть логина) для поиска")
+	vault.FindAccount(login, func(account Account, login string) bool {
+		return strings.Contains(account.Login, login)
+	})
 }
-func DeleteAccount() {
+
+func FindAccountByUrl() {
 	vault := NewVault(files.NewJsonDb())
-	vault.DeleteAccount()
+	url := promptdata.PromptData("Введите URL (или часть URL) для поиска")
+	vault.FindAccount(url, func(account Account, url string) bool {
+		return strings.Contains(account.URL, url)
+	})
+}
+
+func DeleteAccountByLogin() {
+	vault := NewVault(files.NewJsonDb())
+	vault.DeleteAccount(func(account Account, login string) bool {
+		return strings.Contains(account.Login, login)
+	})
 }
