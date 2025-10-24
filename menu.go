@@ -2,38 +2,33 @@ package main
 
 import (
 	"account-manager/account"
-	"bufio"
+	promptdata "account-manager/promptData"
 	"fmt"
-	"os"
 )
 
-var menu = map[int]func(){
-	1: account.CreateAccount,
-	2: account.FindAccountByLogin,
-	3: account.FindAccountByUrl,
-	4: account.DeleteAccountByLogin,
+var menu = map[string]func(){
+	"1": account.CreateAccount,
+	"2": account.FindAccountByLogin,
+	"3": account.FindAccountByUrl,
+	"4": account.DeleteAccountByLogin,
 }
 
 func Menu() {
 Menu:
 	for {
-		fmt.Println("Выберете действие: ")
-		fmt.Println("1 - создать аккаунт")
-		fmt.Println("2 - найти аккаунт по логину")
-		fmt.Println("3 - найти аккаунт по URL")
-		fmt.Println("4 - удалить аккаунт")
-		fmt.Println("5 - выйти из программы")
-
-		var input int
-		fmt.Scan(&input)
-
-		reader := bufio.NewReader(os.Stdin)
-		reader.ReadString('\n')
+		input := promptdata.PromptData(
+			"Выберете действие: \n",
+			"1 - создать аккаунт\n",
+			"2 - найти аккаунт по логину\n",
+			"3 - найти аккаунт по URL\n",
+			"4 - удалить аккаунт\n",
+			"5 - выйти из программы\n",
+		)
 
 		menuFunc := menu[input]
 		if menuFunc != nil {
 			menuFunc()
-		} else if input == 5 {
+		} else if input == "5" {
 			break Menu
 		} else {
 			fmt.Println("Некорректный ввод, попробуйте еще раз!")
