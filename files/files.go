@@ -10,7 +10,7 @@ type JsonDb struct {
 }
 
 func NewJsonDb() *JsonDb {
-	name := "accounts.json"
+	name := "accounts.vault"
 	return &JsonDb{
 		NameDb: name,
 	}

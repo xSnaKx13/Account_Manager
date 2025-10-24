@@ -1,6 +1,7 @@
 package account
 
 import (
+	"account-manager/encrypter"
 	"account-manager/files"
 	promptdata "account-manager/promptData"
 	"errors"
@@ -74,14 +75,14 @@ func newAccount() error {
 		newAcc.generatePassword(12)
 	}
 	db := files.NewJsonDb()
-	vault := NewVault(db)
+	vault := NewVault(db, encrypter.NewEncrypter())
 	vault.AddAccount(*newAcc)
 	vault.SaveAndUpdate(db)
 	return nil
 }
 
 func FindAccountByLogin() {
-	vault := NewVault(files.NewJsonDb())
+	vault := NewVault(files.NewJsonDb(), encrypter.NewEncrypter())
 	login := promptdata.PromptData("Введите логин (или часть логина) для поиска")
 	vault.FindAccount(login, func(account Account, login string) bool {
 		return strings.Contains(account.Login, login)
@@ -89,7 +90,7 @@ func FindAccountByLogin() {
 }
 
 func FindAccountByUrl() {
-	vault := NewVault(files.NewJsonDb())
+	vault := NewVault(files.NewJsonDb(), encrypter.NewEncrypter())
 	url := promptdata.PromptData("Введите URL (или часть URL) для поиска")
 	vault.FindAccount(url, func(account Account, url string) bool {
 		return strings.Contains(account.URL, url)
@@ -97,7 +98,7 @@ func FindAccountByUrl() {
 }
 
 func DeleteAccountByLogin() {
-	vault := NewVault(files.NewJsonDb())
+	vault := NewVault(files.NewJsonDb(), encrypter.NewEncrypter())
 	vault.DeleteAccount(func(account Account, login string) bool {
 		return strings.Contains(account.Login, login)
 	})

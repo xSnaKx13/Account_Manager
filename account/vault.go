@@ -1,6 +1,7 @@
 package account
 
 import (
+	"account-manager/encrypter"
 	"account-manager/files"
 	promptdata "account-manager/promptData"
 	"encoding/json"
@@ -20,7 +21,8 @@ type Vault struct {
 
 type VaultWithDb struct {
 	Vault
-	db Db
+	db  Db
+	enc encrypter.Encrypter
 }
 
 func (vault *VaultWithDb) AddAccount(acc Account) {
@@ -33,7 +35,8 @@ func (vault *VaultWithDb) SaveAndUpdate(db Db) {
 	if err != nil {
 		promptdata.PrintError("Ошибка записи!")
 	}
-	db.Write(data)
+	encryptedData := vault.enc.Encrypt(data)
+	db.Write(encryptedData)
 }
 
 func (vault *VaultWithDb) FindAccount(prompt string, checker func(Account, string) bool) {
@@ -89,8 +92,7 @@ func (vault *Vault) ToBytes() ([]byte, error) {
 	return data, nil
 }
 
-func NewVault(db Db) *VaultWithDb {
-
+func NewVault(db Db, encrypter *encrypter.Encrypter) *VaultWithDb {
 	data, err := db.Read()
 	if err != nil {
 		promptdata.PrintError("Файл отсутствует, будет создан новый файл!")
@@ -99,13 +101,19 @@ func NewVault(db Db) *VaultWithDb {
 				Accaunts:  []Account{},
 				UpdatedAt: time.Now(),
 			},
-			db: db,
+			db:  db,
+			enc: *encrypter,
 		}
 	}
+	decryptedData := encrypter.Decrypt(data)
 	var existingVault VaultWithDb
-	err = json.Unmarshal(data, &existingVault)
+	err = json.Unmarshal(decryptedData, &existingVault)
 	if err != nil {
 		promptdata.PrintError("Ошибка распаковки json!")
 	}
-	return &existingVault
+	return &VaultWithDb{
+		Vault: existingVault.Vault,
+		db:    db,
+		enc:   *encrypter,
+	}
 }
